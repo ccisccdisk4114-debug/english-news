@@ -2,31 +2,25 @@ import json
 import os
 
 
-FILE_NAME = "sent_news.json"
+FILE = "sent_news.json"
 
 
 def load_sent_news():
-    """
-    Carrega os links das notícias já enviadas.
-    """
 
-    if not os.path.exists(FILE_NAME):
+    if not os.path.exists(FILE):
         return []
 
-    with open(FILE_NAME, "r", encoding="utf-8") as file:
-        return json.load(file)
+    with open(FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 
-def save_sent_news(sent_news):
-    """
-    Salva os links das notícias enviadas.
-    """
+def save_sent_news(news):
 
-    with open(FILE_NAME, "w", encoding="utf-8") as file:
+    with open(FILE, "w", encoding="utf-8") as f:
         json.dump(
-            sent_news,
-            file,
+            news,
+            f,
             indent=4,
             ensure_ascii=False
         )
@@ -34,8 +28,10 @@ def save_sent_news(sent_news):
 
 
 def is_already_sent(link, sent_news):
-    """
-    Verifica se uma notícia já foi enviada.
-    """
 
-    return link in sent_news
+    for item in sent_news:
+
+        if item["link"] == link:
+            return True
+
+    return False
