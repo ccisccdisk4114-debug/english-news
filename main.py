@@ -4,65 +4,122 @@ from storage import load_sent_news, save_sent_news, is_already_sent
 from discord_sender import send_to_discord
 
 import random
+import os
 
 
-# Carrega histórico de notícias enviadas
 sent_news = load_sent_news()
 
 
-# Busca todas as notícias dos feeds RSS
+selected_source = os.environ.get("NEWS_SOURCE")
+
+
 all_news = []
 
-for source, url in RSS_FEEDS.items():
 
-    news = read_feed(source, url)
+if selected_source:
+
+    if selected_source not in RSS_FEEDS:
+
+        print(
+            f"Fonte inválida: {selected_source}"
+        )
+
+        exit()
+
+
+    print(
+        f"Fonte selecionada: {selected_source}"
+    )
+
+
+    news = read_feed(
+        selected_source,
+        RSS_FEEDS[selected_source]
+    )
+
 
     all_news.extend(news)
 
 
-print(f"Total de notícias encontradas: {len(all_news)}")
-
-
-# Filtra notícias ainda não enviadas
-new_news = []
-
-for article in all_news:
-
-    if not is_already_sent(article["link"], sent_news):
-        new_news.append(article)
-
-
-print(f"Notícias novas: {len(new_news)}")
-
-
-# Caso não existam notícias novas
-if len(new_news) == 0:
-
-    print("Nenhuma notícia nova encontrada.")
 
 else:
 
-    # Escolhe uma notícia aleatória
-    selected_news = random.choice(new_news)
+    print(
+        "Nenhuma fonte definida. Usando todas."
+    )
 
 
-    print("\nNotícia escolhida:")
-    print("=" * 60)
+    for source, url in RSS_FEEDS.items():
 
-    print("Fonte:", selected_news["source"])
-    print("Título:", selected_news["title"])
-    print("Resumo:", selected_news["summary"])
-    print("Link:", selected_news["link"])
+        news = read_feed(
+            source,
+            url
+        )
 
-
-    # Envia a notícia formatada para o Discord
-    send_to_discord(selected_news)
+        all_news.extend(news)
 
 
-    # Salva no histórico somente após o envio
-    sent_news.append(selected_news["link"])
 
-    save_sent_news(sent_news)
+print(
+    f"Total de notícias encontradas: {len(all_news)}"
+)
 
 
-    print("\nNotícia enviada e salva no histórico.")
+
+new_news = []
+
+
+for article in all_news:
+
+    if not is_already_sent(
+        article["link"],
+        sent_news
+    ):
+
+        new_news.append(article)
+
+
+
+print(
+    f"Notícias novas: {len(new_news)}"
+)
+
+
+
+if len(new_news) == 0:
+
+    print(
+        "Nenhuma notícia nova."
+    )
+
+
+else:
+
+    selected_news = random.choice(
+        new_news
+    )
+
+
+    print(
+        selected_news["title"]
+    )
+
+
+    send_to_discord(
+        selected_news
+    )
+
+
+    sent_news.append(
+        selected_news["link"]
+    )
+
+
+    save_sent_news(
+        sent_news
+    )
+
+
+    print(
+        "Finalizado."
+    )
