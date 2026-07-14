@@ -1,42 +1,64 @@
 import requests
 import os
+from formatter import clean_html
 
 
 def send_to_discord(news):
 
     webhook_url = os.environ["DISCORD_WEBHOOK"]
 
+
     embed = {
+
         "title": f"📰 {news['title']}",
+
         "url": news["link"],
 
-        "description": news["summary"],
+
+        "description": clean_html(news["summary"])[:4000],
+
 
         "fields": [
+
             {
                 "name": "🏢 Source",
                 "value": news["source"],
                 "inline": True
             },
+
             {
                 "name": "📅 Published",
-                "value": news["published"],
+                "value": news.get("published", "Unknown"),
                 "inline": True
             }
+
         ],
 
-        "footer": {
-            "text": "🇬🇧 Daily English Reading • Improve your English every day"
-        },
 
-        "thumbnail": {
-            "url": news["image"]
+        "footer": {
+
+            "text":
+            "🇬🇧 Daily English Reading • Improve your English every day"
+
         }
+
     }
 
 
+    # adiciona imagem somente se existir
+    if news.get("image"):
+
+        embed["image"] = {
+            "url": news["image"]
+        }
+
+
     data = {
-        "embeds": [embed]
+
+        "embeds": [
+            embed
+        ]
+
     }
 
 
@@ -47,8 +69,10 @@ def send_to_discord(news):
 
 
     if response.status_code == 204:
-        print("Embed enviado ao Discord!")
+
+        print("Mensagem enviada ao Discord!")
 
     else:
-        print("Erro ao enviar embed:")
+
+        print("Erro no Discord:")
         print(response.text)
