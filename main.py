@@ -3,33 +3,30 @@ from rss_reader import read_feed
 from storage import load_sent_news, save_sent_news, is_already_sent
 from discord_sender import send_to_discord
 
-import random
 import os
 
 
+# Carrega histórico
 sent_news = load_sent_news()
 
 
+# Recebe a fonte definida pelo cron/workflow
 selected_source = os.environ.get("NEWS_SOURCE")
 
 
 all_news = []
 
 
+# Caso uma fonte específica seja definida
 if selected_source:
 
     if selected_source not in RSS_FEEDS:
 
-        print(
-            f"Fonte inválida: {selected_source}"
-        )
-
+        print(f"Fonte inválida: {selected_source}")
         exit()
 
 
-    print(
-        f"Fonte selecionada: {selected_source}"
-    )
+    print(f"Fonte selecionada: {selected_source}")
 
 
     news = read_feed(
@@ -37,17 +34,13 @@ if selected_source:
         RSS_FEEDS[selected_source]
     )
 
-
     all_news.extend(news)
 
 
-
+# Caso nenhuma fonte seja definida
 else:
 
-    print(
-        "Nenhuma fonte definida. Usando todas."
-    )
-
+    print("Nenhuma fonte definida. Usando todas.")
 
     for source, url in RSS_FEEDS.items():
 
@@ -66,6 +59,7 @@ print(
 
 
 
+# Filtra notícias que ainda não foram enviadas
 new_news = []
 
 
@@ -86,32 +80,46 @@ print(
 
 
 
+# Caso não tenha notícia nova
 if len(new_news) == 0:
 
-    print(
-        "Nenhuma notícia nova."
-    )
+    print("Nenhuma notícia nova encontrada.")
+
 
 
 else:
 
-    selected_news = random.choice(
-        new_news
-    )
+    # Ordena pela data e pega a mais recente
+    selected_news = sorted(
+        new_news,
+        key=lambda x: x["published"],
+        reverse=True
+    )[0]
 
 
-    print(
-        selected_news["title"]
-    )
+    print("\nNotícia escolhida:")
+    print("=" * 60)
+
+    print("Fonte:", selected_news["source"])
+    print("Título:", selected_news["title"])
+    print("Data:", selected_news["published"])
+    print("Link:", selected_news["link"])
 
 
+
+    # Envia para Discord
     send_to_discord(
         selected_news
     )
 
 
+
+    # Salva no histórico com data
     sent_news.append(
-        selected_news["link"]
+        {
+            "link": selected_news["link"],
+            "date": selected_news["published"]
+        }
     )
 
 
@@ -120,6 +128,4 @@ else:
     )
 
 
-    print(
-        "Finalizado."
-    )
+    print("\nNotícia enviada e salva no histórico.")
