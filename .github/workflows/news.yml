@@ -1,46 +1,86 @@
-name: Test RSS Reader
+name: Daily English News
+
 
 on:
+
   workflow_dispatch:
+
+    inputs:
+
+      source:
+
+        description: "Fonte de notícias"
+
+        required: true
+
+        default: "BBC"
+
+
 
 jobs:
 
-  test:
+  news:
+
 
     runs-on: ubuntu-latest
 
+
     permissions:
+
       contents: write
+
+
 
     steps:
 
+
       - name: Baixar projeto
+
         uses: actions/checkout@v4
 
 
-      - name: Instalar Python
+
+      - name: Configurar Python
+
         uses: actions/setup-python@v5
+
         with:
+
           python-version: "3.12"
 
 
+
       - name: Instalar dependências
+
         run: pip install -r requirements.txt
 
 
+
       - name: Executar bot
+
         env:
+
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
+          NEWS_SOURCE: ${{ github.event.inputs.source }}
+
         run: python main.py
 
 
+
       - name: Salvar histórico
+
         run: |
+
           git config --global user.name "github-actions"
+
           git config --global user.email "github-actions@github.com"
+
 
           git add sent_news.json
 
-          git commit -m "Atualiza histórico de notícias" || echo "Sem mudanças"
+
+          git commit -m "Atualiza histórico de notícias" || echo "Sem alterações"
+
 
           git push
