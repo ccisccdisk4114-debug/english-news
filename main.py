@@ -23,7 +23,7 @@ for source, url in RSS_FEEDS.items():
 print(f"Total de notícias encontradas: {len(all_news)}")
 
 
-# Filtra notícias que ainda não foram enviadas
+# Filtra notícias ainda não enviadas
 new_news = []
 
 for article in all_news:
@@ -55,28 +55,11 @@ else:
     print("Link:", selected_news["link"])
 
 
-    # Cria mensagem para o Discord
-    message = f"""
-🇬🇧 **Daily English Reading**
-
-📰 **{selected_news['title']}**
-
-🏢 **Source:**
-{selected_news['source']}
-
-📖 **Summary:**
-{selected_news['summary']}
-
-🔗 **Read more:**
-{selected_news['link']}
-"""
+    # Envia a notícia formatada para o Discord
+    send_to_discord(selected_news)
 
 
-    # Envia para o Discord
-    send_to_discord(message)
-
-
-    # Salva a notícia no histórico
+    # Salva no histórico somente após o envio
     sent_news.append(selected_news["link"])
 
     save_sent_news(sent_news)
