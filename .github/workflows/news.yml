@@ -19,6 +19,7 @@ on:
 
 jobs:
 
+
   news:
 
 
@@ -63,6 +64,12 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
           NEWS_SOURCE: ${{ github.event.inputs.source }}
+
+          MORNING_ROLE: ${{ secrets.MORNING_ROLE }}
+
+          AFTERNOON_ROLE: ${{ secrets.AFTERNOON_ROLE }}
+
+          NIGHT_ROLE: ${{ secrets.NIGHT_ROLE }}
 
         run: python main.py
 
